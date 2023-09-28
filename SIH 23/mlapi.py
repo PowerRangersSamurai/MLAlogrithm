@@ -43,12 +43,26 @@ class DelayInput(BaseModel):
 def predict_delay(input_data: DelayInput):
     try:
         print(input_data)
+        
+        feature_mapping = {
+            "number_of_workers": "number of workers",
+            "budget_allocated": "budget allocated",
+            "availability_of_resources": "availability of resources",
+            "weather_condition": "weather condition",
+            "location": "location",
+            "estimated_completion_time": "estimated completion time",
+            "delay_in_inspections": "delay in inspections",
+            "delay_in_material_approval": "delay in material approval",
+            "shortage_of_laborers": "shortage of laborers",
+            "inadequate_number_of_equipment": "inadequate number of equipment",
+        }
 
-       # Added these lines to store the transformed values:
-        encoded_weather_condition = label_encoders['weather_condition'].transform([input_data.weather_condition])[0]
-        encoded_location = label_encoders['location'].transform([input_data.location])[0]
+        # Map the input features to the expected names
+        mapped_input_data = {feature_mapping.get(k, k): v for k, v in input_data.dict().items()}
 
-
+        # Now you can use the mapped_input_data to access the features without underscores
+        encoded_weather_condition = label_encoders['weather condition'].transform([mapped_input_data['weather condition']])[0]
+        encoded_location = label_encoders['location'].transform([mapped_input_data['location']])[0]
         # Scale numerical features using the loaded scaler
         numerical_features = ['number_of_workers', 'budget_allocated', 'availability_of_resources', 'estimated_completion_time',
                               'delay_in_inspections', 'delay_in_material_approval', 'shortage_of_laborers',
@@ -62,8 +76,8 @@ def predict_delay(input_data: DelayInput):
 
         # Make prediction
         predicted_delay = model.predict(user_input_scaled)
-
-        return jsonify({"prediction": predicted_delay[0]})
+        print(predicted_delay)
+        return {"prediction": predicted_delay[0]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
